@@ -1,4 +1,5 @@
-# Logs
+
+#Logs
 logs
 *.log
 npm-debug.log*
@@ -135,3 +136,6 @@ public/.DS_Store
 public/assets/.DS_Store
 public/images/.DS_Store
 .DS_Store
+.firebase/hosting.cHVibGlj.cache
+.firebase/hosting.cHVibGlj.cache
+.firebase/hosting.cHVibGlj.cache
