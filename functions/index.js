@@ -15,7 +15,7 @@ const postmark = require("postmark");
 // Initialize Postmark with your server API token
 const client = new postmark.ServerClient("cda672e5-607c-4922-ae5c-653882ee5eac");
 
-exports.sendEmail = onRequest(async (req, res) => {
+exports.sendEmail = functions.https.onRequest(async (req, res) => {
   logger.info("hello logs!")
   
   if (req.method !== "POST") {
