@@ -16,7 +16,6 @@ const postmark = require("postmark");
 const client = new postmark.ServerClient("cda672e5-607c-4922-ae5c-653882ee5eac");
 
 exports.sendEmail = functions.https.onRequest(async (req, res) => {
-  logger.info("hello logs!")
   
   if (req.method !== "POST") {
     res.status(405).send("Method Not Allowed");
@@ -31,8 +30,8 @@ exports.sendEmail = functions.https.onRequest(async (req, res) => {
     await client.sendEmail({
       From: contactUsEmail,
       To: contactUsEmail,
-      Subject: category,
-      TextBody: `from: ${email}, name: ${name}, category: ${category}, message: ${message}`, // Fixed TextBody construction
+      Subject: "Contact Us Submission",
+      TextBody: `from: ${email}, name: ${name}, message: ${message}`, // Fixed TextBody construction
     });
 
     // Respond with success
