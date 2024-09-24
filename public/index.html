@@ -161,7 +161,7 @@
 								<p>Contact Us</p>
 								<h2>We'd love to hear from you!</h2>
 
-								<form method="post" action="https://us-central1-smallblueidea.cloudfunctions.net/sendEmail">
+								<form id="contact-form" method="post" action="#">
 									<div class="row uniform">
 										<div class="6u 12u$(xsmall)">
 											<input type="text" name="name" id="name" value="" placeholder="Name" />
@@ -209,6 +209,9 @@
 										</div>
 									</div>
 								</form>
+								<div id="success-popover" style="display:none; position:absolute; background-color:lightgreen; padding:10px; border-radius:5px;">
+									Message sent successfully!
+								</div>
 								
 								<p>e. smallblueidea@gmail.com <br> p. 702-960-9956 <br><br></p> 
 							</header>
@@ -242,6 +245,41 @@
 			<script src="assets/js/skel.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-
+			<script>
+			document.getElementById('contact-form').addEventListener('submit', function(event) {
+					event.preventDefault(); // Prevent the default form submission
+			
+					// Gather form data
+					const formData = new FormData(this);
+			
+					// Send the form data using fetch
+					fetch('https://us-central1-smallblueidea.cloudfunctions.net/sendEmail', {
+							method: 'POST',
+							body: formData,
+					})
+					.then(response => {
+							if (response.ok) {
+									// Show success popover
+									const popover = document.getElementById('success-popover');
+									popover.style.display = 'block';
+									popover.style.position = 'fixed';
+									popover.style.top = '20px'; // Adjust as needed
+									popover.style.right = '20px'; // Adjust as needed
+			
+									// Optionally, hide the popover after a few seconds
+									setTimeout(() => {
+											popover.style.display = 'none';
+									}, 3000);
+							} else {
+									// Handle error
+									alert('There was a problem with your submission.');
+							}
+					})
+					.catch(error => {
+							console.error('Error:', error);
+							alert('There was a problem with your submission.');
+					});
+			});
+			</script>
 	</body>
 </html>

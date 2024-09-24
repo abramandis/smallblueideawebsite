@@ -24,15 +24,15 @@ exports.sendEmail = functions.https.onRequest(async (req, res) => {
   }
 
   try {
-    const {email, subject, message} = req.body;
+    const {email, subject, message, name, category} = req.body;
     const contactUsEmail = "abram@smallblueidea.com"
 
     // Send the email through Postmark
     await client.sendEmail({
-      From: email,
+      From: contactUsEmail,
       To: contactUsEmail,
-      Subject: subject,
-      TextBody: message,
+      Subject: category,
+      TextBody: `from: ${email}, name: ${name}, category: ${category}, message: ${message}`, // Fixed TextBody construction
     });
 
     // Respond with success
