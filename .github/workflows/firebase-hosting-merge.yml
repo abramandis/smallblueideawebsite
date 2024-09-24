@@ -19,7 +19,7 @@ jobs:
           node-version: '20'  # Specify Node.js version 20
 
       - name: Install dependencies and build
-        run: npm ci && npm run build
+        run: npm ci #&& npm run build
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
