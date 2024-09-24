@@ -35,14 +35,24 @@ exports.sendEmail = functions.https.onRequest(async (req, res) => {
     });
 
     // Respond with success
-    res.status(200).json({
-      success: true,
-      message: "Email sent successfully"});
+    res.status(200).send(`
+      <html>
+        <body>
+          <h1>Thank You!</h1>
+          <p>Your email has been sent successfully.</p>
+        </body>
+      </html>
+    `);
   } catch (error) {
     console.error(error);
     // Respond with error
-    res.status(500).json({
-      success: false,
-      message: error.message});
+    res.status(500).send(`
+      <html>
+        <body>
+          <h1>There was an issue with your submission.</h1>
+          <p>Please try again.</p>
+        </body>
+      </html>
+    `);
   }
 });
