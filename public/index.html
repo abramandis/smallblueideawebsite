@@ -184,7 +184,7 @@
 								<p>Contact Us</p>
 								<h2>We'd love to hear from you!</h2>
 
-								<form id="contact-form-FALSE" method="post" action="https://us-central1-smallblueidea.cloudfunctions.net/sendEmail">
+								<form id="contact-form" method="post" action='https://us-central1-smallblueidea.cloudfunctions.net/sendEmail'>
 									<div class="row uniform">
 										<div class="6u 12u$(xsmall)">
 											<input type="text" name="name" id="name" value="" placeholder="Name" />
@@ -215,12 +215,20 @@
 											<input type="checkbox" id="copy" name="copy">
 											<label for="copy">Email me a copy of this message</label>
 										</div>
-									
-										<div class="6u$ 12u$(small)">
-											<input type="checkbox" id="human" name="human" checked>
-											<label for="human">I'm definately not a robot.</label>
+										-->
+								
+										<div>
+											<div class="6u$ 12u$(small)" style="width: 100%;">
+												<input type="checkbox" id="human" name="human">
+												<label for="human">I'm definately not a robot.</label>
+											</div>
+	
+											<div class="6u 12u$(small)" style="display: none;">
+												<input type="checkbox" id="honeypot" name="honeypot">
+												<label for="honeypot">Captcha! Please check this box.</label>
+											</div>
 										</div>
-										--> 
+										
 										<div class="12u$">
 											<textarea name="message" id="message" placeholder="Enter your message" rows="6"></textarea>
 										</div>
@@ -268,19 +276,35 @@
 			<script src="assets/js/skel.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<!-- issue with CORS doing it this way. Doing it on the server side now after regular form submission.
 			<script>
-			document.getElementById('contact-form').addEventListener('submit', function(event) {
+			document.addEventListener('DOMContentLoaded', function() {
+				document.getElementById('contact-form').addEventListener('submit', function(event) {
 					event.preventDefault(); // Prevent the default form submission
 			
 					// Gather form data
 					const formData = new FormData(this);
-			
-					// Send the form data using fetch
-					fetch('https://us-central1-smallblueidea.cloudfunctions.net/sendEmail', {
+					console.log("Form Data: ", formData);
+
+							
+					// Log form data
+					for (const [key, value] of formData.entries()) {
+						console.log(`${key}: ${value}`);
+					}
+
+					if (document.getElementById('honeypot').checked) {
+						return;
+					}
+
+					if (document.getElementById('human').checked) {
+						// Send the form data using fetch
+						checked = document.getElementById('human').checked;
+						console.log("Checked: ", checked);
+						fetch('https://us-central1-smallblueidea.cloudfunctions.net/sendEmail', {
 							method: 'POST',
 							body: formData,
-					})
-					.then(response => {
+						})
+						.then(response => {
 							if (response.ok) {
 									// Show success popover
 									const popover = document.getElementById('success-popover');
@@ -297,12 +321,18 @@
 									// Handle error
 									alert('There was a problem with your submission.');
 							}
-					})
-					.catch(error => {
-							console.error('Error:', error);
-							alert('There was a problem with your submission.');
-					});
+						})
+						.catch(error => {
+								console.error('Error:', error);
+								alert('There was a problem with your submission.');
+						});
+					}
+					else {
+						return;
+					}
+				});
 			});
 			</script>
+			-->
 	</body>
 </html>

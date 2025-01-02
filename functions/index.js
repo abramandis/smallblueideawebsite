@@ -1,5 +1,10 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
+const cors = require("cors");
+const corsOptions = {
+  origin: "https://smallblueidea.com",
+  methods: ["GET", "POST"],
+};
 
 exports.helloWorld = onRequest((request, response) => {
    logger.info("Hello logs!", {structuredData: true});
@@ -15,7 +20,7 @@ const postmark = require("postmark");
 // Initialize Postmark with your server API token
 const client = new postmark.ServerClient("cda672e5-607c-4922-ae5c-653882ee5eac");
 
-exports.sendEmail = functions.https.onRequest(async (req, res) => {
+exports.sendEmail = functions.https.onRequest(cors(corsOptions), async (req, res) => {
   
   if (req.method !== "POST") {
     res.status(405).send("Method Not Allowed");
@@ -23,8 +28,29 @@ exports.sendEmail = functions.https.onRequest(async (req, res) => {
   }
 
   try {
-    const {email, subject, message, name, category} = req.body;
+    const {email, subject, message, name, category, honeypot, human} = req.body;
     const contactUsEmail = "abram@smallblueidea.com"
+
+    if (honeypot) {
+      res.status(400).send(`
+        <html>
+          <body>
+            <h1>Spam Detected!</h1>
+            <p>Your email has not been sent.</p>
+          </body>
+        </html>
+      `);
+    }
+    if (!human) {
+      res.status(400).send(`
+        <html>
+          <body>
+            <h1>Spam Detected!</h1>
+            <p>Your email has not been sent.</p>
+          </body>
+        </html>
+      `);
+    }
 
     // Send the email through Postmark
     await client.sendEmail({
