@@ -312,4 +312,181 @@ var settings = {
 
 	});
 
+	// Contact Form Protection
+	$(document).ready(function() {
+		var $contactForm = $('#contact-form');
+		var $submitButton = $contactForm.find('input[type="submit"]');
+		var formSubmissionTime = 0;
+		var minSubmissionTime = 3000; // Minimum 3 seconds to fill form
+		
+		// Track when form becomes visible
+		var formVisibleTime = Date.now();
+		
+		// Add timestamp field for additional protection
+		$contactForm.append('<input type="hidden" name="timestamp" value="' + Date.now() + '">');
+		
+		// Disable submit button initially
+		$submitButton.prop('disabled', true);
+		
+		// Enable submit button after minimum time
+		setTimeout(function() {
+			$submitButton.prop('disabled', false);
+		}, minSubmissionTime);
+		
+		// Form submission handler
+		$contactForm.on('submit', function(e) {
+			e.preventDefault(); // Prevent default form submission
+			
+			var currentTime = Date.now();
+			var timeElapsed = currentTime - formVisibleTime;
+			
+			// Check if enough time has passed
+			if (timeElapsed < minSubmissionTime) {
+				showMessage('Please take your time filling out the form.', 'error');
+				return false;
+			}
+			
+			// Frontend validation
+			var email = $('#email').val().trim();
+			var message = $('#message').val().trim();
+			var name = $('#name').val().trim();
+			
+			// Clear previous error states
+			$('#name, #email, #message').removeClass('error');
+			
+			// Check if required fields are filled
+			if (!name) {
+				showMessage('Please enter your name.', 'error');
+				$('#name').addClass('error').focus();
+				return false;
+			}
+			
+			if (!email) {
+				showMessage('Please enter your email address.', 'error');
+				$('#email').addClass('error').focus();
+				return false;
+			}
+			
+			// Basic email validation
+			var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) {
+				showMessage('Please enter a valid email address.', 'error');
+				$('#email').addClass('error').focus();
+				return false;
+			}
+			
+			if (!message) {
+				showMessage('Please enter a message.', 'error');
+				$('#message').addClass('error').focus();
+				return false;
+			}
+			
+			// Check honeypot field
+			if ($('#honeypot').val()) {
+				showMessage('Invalid submission detected.', 'error');
+				return false;
+			}
+			
+			// Disable submit button to prevent double submission
+			$submitButton.prop('disabled', true).val('Sending...').addClass('loading');
+			
+			// Update timestamp
+			$('input[name="timestamp"]').val(currentTime);
+			
+			// Gather form data as JSON
+			var formData = {
+				name: $('#name').val().trim(),
+				email: $('#email').val().trim(),
+				message: $('#message').val().trim(),
+				honeypot: $('#honeypot').val(),
+				timestamp: currentTime
+			};
+			
+			// Send the form data using fetch
+
+			console.log("Form Data: ", formData);
+
+			fetch('https://us-central1-smallblueidea.cloudfunctions.net/sendEmail', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(formData),
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					// Show success message
+					showMessage(data.success, 'success');
+					// Reset form
+					$contactForm[0].reset();
+					$submitButton.prop('disabled', true);
+					formVisibleTime = Date.now(); // Reset timer
+					// Re-enable button after minimum time
+					setTimeout(function() {
+						$submitButton.prop('disabled', false);
+					}, minSubmissionTime);
+				} else if (data.error) {
+					// Handle error
+					console.log('Error:', data.error);
+					showMessage(data.error, 'error');
+					$submitButton.prop('disabled', false).val('Send Message').removeClass('loading');
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				showMessage('There was a problem with your submission. Please try again.', 'error');
+				$submitButton.prop('disabled', false).val('Send Message').removeClass('loading');
+			});
+		});
+		
+		// Add random delay to form fields to confuse bots
+		$contactForm.find('input, textarea').each(function() {
+			var $field = $(this);
+			var originalName = $field.attr('name');
+			
+			// Add random attribute to confuse bots
+			$field.attr('data-field-id', Math.random().toString(36).substr(2, 9));
+			
+			// Add event listeners to track human interaction
+			$field.on('focus blur input', function() {
+				$field.attr('data-interacted', 'true');
+			});
+			
+			// Clear error state when user starts typing
+			$field.on('input', function() {
+				$(this).removeClass('error');
+			});
+		});
+		
+		// Function to show messages
+		function showMessage(message, type) {
+			// Remove existing message if any
+			$('.message-popup').remove();
+			
+			// Create message popup
+			var $popup = $('<div class="message-popup" style="position: fixed; bottom: 20px; right: 20px; padding: 15px 20px; border-radius: 5px; color: white; font-weight: bold; z-index: 10000; max-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">' + message + '</div>');
+			
+			// Set background color based on message type
+			if (type === 'success') {
+				$popup.css('background-color', '#4CAF50');
+			} else if (type === 'error') {
+				$popup.css('background-color', '#f44336');
+			}
+			
+			// Add to page
+			$('body').append($popup);
+			
+			// Animate in
+			$popup.hide().fadeIn(300);
+			
+			// Auto remove after 5 seconds
+			setTimeout(function() {
+				$popup.fadeOut(300, function() {
+					$(this).remove();
+				});
+			}, 5000);
+		}
+	});
+
 })(jQuery);
